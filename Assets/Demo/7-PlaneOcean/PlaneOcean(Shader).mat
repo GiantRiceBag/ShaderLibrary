@@ -46,7 +46,7 @@ Material:
     - _FoamScale: 3.24
     - _FoamSpeed: 0.05
     - _NoiseScale: 10
-    - _NoiseSpeed: 0.1
+    - _NoiseSpeed: 0.05
     - _NoiseStrength: 0.13
     - _WaveCount: 0.3
     - _WaveCutOff: 0.3
