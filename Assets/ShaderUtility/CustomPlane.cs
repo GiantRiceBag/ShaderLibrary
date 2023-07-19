@@ -6,13 +6,14 @@ public class CustomPlane : MonoBehaviour
 {
     public bool isStaticMesh;
 
-    [Range(2, 256)] public int meshSize = 8;
+    [Range(10, 256)] public int meshWidth = 10;
+    [Range(10, 256)] public int meshHeight = 10;
     [Range(1, 256)] public int meshScale = 10;
+    public Vector2 origin = new Vector2(0.5f, 0.5f);
 
     Mesh mesh;
     MeshFilter meshFilter;
 
-    Vector3 origin;
     Vector3[] vertices;
     Vector2[] uvs;
     int[] triangles;
@@ -20,6 +21,7 @@ public class CustomPlane : MonoBehaviour
     private void Awake()
     {
         InitializeMesh();
+        RegenerateMesh();
     }
 
     private void OnValidate()
@@ -33,7 +35,6 @@ public class CustomPlane : MonoBehaviour
         if (isStaticMesh)
             return;
 
-        origin = transform.position;
         mesh.Clear();
         mesh.vertices = vertices;
         mesh.uv = uvs;
@@ -43,48 +44,49 @@ public class CustomPlane : MonoBehaviour
 
     void InitializeMesh()
     {
-        origin = transform.position;
-        vertices = new Vector3[meshSize * meshSize];
-        uvs = new Vector2[meshSize * meshSize];
-        triangles = new int[(meshSize - 1) * (meshSize - 1) * 6];
+        vertices = new Vector3[meshWidth * meshHeight];
+        uvs = new Vector2[meshWidth * meshHeight];
+        triangles = new int[(meshWidth - 1) * (meshHeight - 1) * 6];
 
         meshFilter = GetComponent<MeshFilter>();
-        mesh = meshFilter.sharedMesh;
+        mesh = new Mesh();
+        meshFilter.sharedMesh = mesh;
     }
 
     // 重新生成网格
     void RegenerateMesh()
     {
-        float delta = 1f / (float)meshSize;
+        float deltaX = 1f / (float)meshWidth;
+        float deltaY = 1f / (float)meshHeight;
 
-        for (int i = 0; i < meshSize; i++)
+        for (int y = 0; y < meshHeight; y++)
         {
-            for (int j = 0; j < meshSize; j++)
+            for (int x = 0; x < meshWidth; x++)
             {
-                int index = i * meshSize + j;
+                int index = y * meshWidth + x;
                 vertices[index] = new Vector3(
-                        meshScale * delta * (i - meshSize * 0.5f),
+                        meshScale * deltaX * (x - meshWidth * origin.x),
                         0,
-                        meshScale * delta * (j - meshSize * 0.5f)
+                        meshScale * deltaY * (y - meshHeight * origin.y)
                     );
-                uvs[index] = new Vector2((float)i / (float)meshSize, (float)j / (float)meshSize);
+                uvs[index] = new Vector2((float)x / (float)(meshWidth-1), (float)y / (float)(meshHeight-1));
             }
         }
 
         int tindex = 0;
-        for (int i = 0; i < meshSize - 1; i++)
+        for (int y = 0; y < meshHeight - 1; y++)
         {
-            for (int j = 0; j < meshSize - 1; j++)
+            for (int x = 0; x < meshWidth - 1; x++)
             {
-                // 三角网格索引 逆时针为正面 顺时针为背面
+                // 三角网格索引 顺时针为正面 逆时针为背面
                 // 左下三角网格
-                triangles[tindex++] = i * meshSize + j;
-                triangles[tindex++] = i * meshSize + j + meshSize + 1;
-                triangles[tindex++] = i * meshSize + j + meshSize;
+                triangles[tindex++] = y * meshWidth + x;
+                triangles[tindex++] = y * meshWidth + x + meshWidth;
+                triangles[tindex++] = y * meshWidth + x + meshWidth + 1;
                 // 右上三角网格
-                triangles[tindex++] = i * meshSize + j;
-                triangles[tindex++] = i * meshSize + j + 1;
-                triangles[tindex++] = i * meshSize + j + 1 + meshSize;
+                triangles[tindex++] = y  * meshWidth + x;
+                triangles[tindex++] = y * meshWidth + x + 1 + meshWidth;
+                triangles[tindex++] = y * meshWidth + x + 1;
             }
         }
 
