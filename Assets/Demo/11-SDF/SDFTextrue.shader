@@ -76,7 +76,7 @@ Shader "Unlit/SDFTextrue"
 
                 float circle = min(min(min(circle1,circle2),circle3),circle4);
 
-                return lerp((1 - (sdfCol.r)) - _SDFThreshold,circle,_Lerp) <= 0 ;
+                return lerp((1 - (sdfCol.a)) - _SDFThreshold,circle,_Lerp) <= 0 ;
             }
             ENDCG
         }
